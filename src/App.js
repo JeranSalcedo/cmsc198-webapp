@@ -1,20 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import Header from './components/layout/Header'
 import LogIn from './components/pages/LogIn';
 import Home from './components/pages/Home';
-import './App.css';
-import axios from 'axios';
+import About from './components/pages/About';
+import 'semantic-ui-less/semantic.less'
+// import axios from 'axios';
 
 const App = () => {
-  const [loggedIn, setLoggedIn] = useState(false);
-
+  // localStorage.clear();
+  console.log(window.localStorage);
   return (
     <Router>
       <div className='app'>
           <div className='container'>
             <Route exact path='/' render={() => (
-              loggedIn? (
+              localStorage.length !== 0? (
                 <React.Fragment>
                   <Header />
                   <Home />
@@ -23,7 +24,19 @@ const App = () => {
                 <Redirect to='/login' />
             )} />
             <Route path='/login' render={() => (
-              <LogIn />
+              localStorage.length !== 0? (
+                <Redirect to='/' />
+              ) :
+                <LogIn />
+            )} />
+            <Route path='/about' render={() => (
+              localStorage.length !== 0? (
+                <React.Fragment>
+                  <Header />
+                  <About />
+                </React.Fragment>
+              ) :
+                <Redirect to='/login' />
             )} />
           </div> 
       </div>
