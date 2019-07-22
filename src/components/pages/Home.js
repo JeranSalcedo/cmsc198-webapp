@@ -1,12 +1,12 @@
 import React from 'react';
-import AdminMenu from './AdminMenu';
 import SemestersList from './SemestersList';
 import ClassesList from './ClassesList';
+import Menu from './admin/Menu';
 
 const Home = () => {
 	return (
 		localStorage.getItem('admin')?
-			<AdminMenu />
+			<Menu />
 		:
 			(
 				<React.Fragment>

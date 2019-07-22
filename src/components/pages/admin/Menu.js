@@ -1,37 +1,61 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Container, Form, List, Modal, Table } from 'semantic-ui-react';
+import { Button, Checkbox, Container, Divider, Dropdown, Form, Input, List, Modal, Table } from 'semantic-ui-react';
 import axios from 'axios';
 import SubjectsList from './SubjectsList';
 import ClassesCount from './ClassesCount';
 
-const AdminMenu = () => {
+const Menu = () => {
 	const [semesters, setSemesters] = useState({});
+	const [subjects, setSubjects] = useState([]);
 
 	useEffect(() => {
 		updateSemesters();
+		updateSubjectsList();
 	}, []);
 
 	const updateSemesters = () => {
 		axios.get(`/api/semester`).then(res => {
-			console.log(res);
+			console.log(res.data);
 			setSemesters(res.data);
 		}, err => {
 			throw err;
 		});
 	}
 
+	const updateSubjectsList = () => {
+		axios.get(`/api/subject`).then(res => {
+			console.log(res.data);
+			setSubjects(res.data);
+		}, err => {
+			throw err;
+		});
+	}
+
 	const onClick = e => {
-		axios.post(`/api/semester/new/${e.target.id}/${semesters[e.target.id].length}`).then(res => {
+		const newSemester = {
+			year: e.target.id,
+			length: semesters[e.target.id].data.length
+		}
+
+		axios.post(`/api/semester/new/`, newSemester).then(res => {
 			updateSemesters();
 		});
 	}
 
 	return (
 		<React.Fragment>
-			<SubjectsList />
+			<Container align='middle'>
+				<SubjectsList subjects={subjects} updateSubjectsList={updateSubjectsList} />
+			</Container>
 			{
 				Object.keys(semesters).reverse().map(year => (
-					<Container key={year} >
+					<Container key={year} text={true} >
+						{
+							semesters[year].active?
+								<Divider horizontal>Current School Year</Divider>
+							:
+								<Divider />
+						}
 						<Table inverted>
 							<Table.Header>
 								<Table.Row>
@@ -42,12 +66,10 @@ const AdminMenu = () => {
 							</Table.Header>
 							<Table.Body>
 								{
-									semesters[year].map(semester => (
+									semesters[year].data.map(semester => (
 										<Table.Row key={semester.id} >
 											<Table.Cell>
 												{semester.title}
-											</Table.Cell>
-											<Table.Cell>
 												<List divided verticalAlign='middle'>
 													<List.Item>
 														<List.Content floated='right'>
@@ -64,15 +86,23 @@ const AdminMenu = () => {
 																			</Modal.Header>
 																			<Modal.Content>
 																				<Form>
-																					<Form.Group widths='equal'>
-																						<Form.Input
+																					<Form.Field>
+																						<Dropdown
+																							placeholder='Select Subject'
 																							fluid
-																							id='subject'
-																							label='Subject'
+																							search
+																							selection
+																							options={subjects}
 																						/>
-																					</Form.Group>
+																					</Form.Field>
+																					<Form.Field>
+																						<Input label='Course Number' toggle />
+																					</Form.Field>
+																					<Form.Field>
+																						<Checkbox label='Finals' toggle />
+																					</Form.Field>
 																				</Form>
-																			</Modal.Content>
+																			</Modal.Content>	
 																		</Modal>
 																	)
 																: null
@@ -87,19 +117,21 @@ const AdminMenu = () => {
 										</Table.Row>
 									))
 								}
-								<Table.Row align='middle'>
-									<Table.Cell>
-										{
-											semesters[year].length < 3?
-											(
+							</Table.Body>
+							{
+								semesters[year].data.length < 3?
+								(
+									<Table.Footer>
+										<Table.Row align='middle'>
+											<Table.HeaderCell>
 												<Button id={year} onClick={onClick} >
 													ADD SEMESTER
 												</Button>
-											) : null
-										}
-									</Table.Cell>
-								</Table.Row>
-							</Table.Body>
+											</Table.HeaderCell>
+										</Table.Row>
+									</Table.Footer>
+								) : null
+							}
 						</Table>
 					</Container>
 				))
@@ -108,4 +140,4 @@ const AdminMenu = () => {
 	)
 }
 
-export default AdminMenu;
+export default Menu;
