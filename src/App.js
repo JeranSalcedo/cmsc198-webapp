@@ -4,11 +4,12 @@ import Header from './components/layout/Header'
 import LogIn from './components/pages/LogIn';
 import Home from './components/pages/Home';
 import About from './components/pages/About';
+import Profile from './components/pages/Profile';
+import Users from './components/pages/Users';
 import 'semantic-ui-less/semantic.less'
 // import axios from 'axios';
 
 const App = () => {
-  // localStorage.clear();
   console.log(window.localStorage);
   return (
     <Router>
@@ -34,6 +35,24 @@ const App = () => {
                 <React.Fragment>
                   <Header />
                   <About />
+                </React.Fragment>
+              ) :
+                <Redirect to='/login' />
+            )} />
+            <Route path='/profile' render={() => (
+              localStorage.length !== 0? (
+                <React.Fragment>
+                  <Header />
+                  <Profile />
+                </React.Fragment>
+              ) :
+                <Redirect to='/login' />
+            )} />
+            <Route path='/users' render={() => (
+              localStorage.length !== 0? (
+                <React.Fragment>
+                  <Header />
+                  <Users />
                 </React.Fragment>
               ) :
                 <Redirect to='/login' />

@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { Button, Container, Form, Icon, Input, List, Modal, Segment } from 'semantic-ui-react';
+import { Button, Form, Icon, Input, List, Modal, Segment } from 'semantic-ui-react';
 import axios from 'axios';
 import CoursesList from './CoursesList';
 
 const SubjectsList = ({ subjects, updateSubjectsList }) => {
 	const [showForm, setShow] = useState(false);
 	const [formTitle, setFormTitle] = useState('ADD');
-	const [editMode, setEditMode] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [targetId, setTargetId] = useState(0);
 
@@ -116,6 +115,22 @@ const SubjectsList = ({ subjects, updateSubjectsList }) => {
 			<Modal.Content>
 				<Segment inverted>
 					<List divided inverted relaxed>
+						<List.Item>
+							<List.Content>
+								{
+									!showForm?
+									(
+										<List.Header>
+											TOTAL : {subjects.length}
+										</List.Header>
+									)
+									: null
+								}
+								<Button icon onClick={addSubject} floated='right' disabled={false}>
+									{formTitle} SUBJECT
+								</Button>
+							</List.Content>
+						</List.Item>
 						{
 							showForm?
 								(
@@ -161,21 +176,11 @@ const SubjectsList = ({ subjects, updateSubjectsList }) => {
 											<Button icon size='mini' floated='right' id={ind} onClick={editSubject}>
 												<Icon id={ind} name='edit' />
 											</Button>
-											<CoursesList />
+											<CoursesList subjectCode={subject.value} subjectId={subject.key} />
 										</List.Content>
 									</List.Item>
 								))
 						}
-						<List.Item>
-							<List.Content>
-								<List.Header>
-									TOTAL: {subjects.length}
-								</List.Header>
-								<Button icon onClick={addSubject} floated='right' disabled={false}>
-									{formTitle} SUBJECT
-								</Button>
-							</List.Content>
-						</List.Item>
 					</List>
 				</Segment>
 			</Modal.Content>

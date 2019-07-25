@@ -49,7 +49,7 @@ const LogIn = () => {
 		<React.Fragment>
 			{
 				redirect?
-					<Redirect to='/login' />
+					<Redirect to='/' />
 				: null
 			}
 			<h1>Log In</h1>
