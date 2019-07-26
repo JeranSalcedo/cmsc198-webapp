@@ -41,6 +41,7 @@ const Home = () => {
 				: null
 			}
 			<Menu semesters={semesters} updateSemesters={updateSemesters} subjects={subjects} />
+			<br />
 		</React.Fragment>
 	)
 }

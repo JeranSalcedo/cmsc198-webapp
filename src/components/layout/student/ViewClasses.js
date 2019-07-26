@@ -1,89 +1,44 @@
 import React, { useState } from 'react';
-import { Button, Form, Icon, Input, List, Modal, Segment } from 'semantic-ui-react';
+import { Accordion, Button, Icon, List, Modal, Segment } from 'semantic-ui-react';
 import axios from 'axios';
+import ClassData from './ClassData';
+import ViewClassSection from './ViewClassSection';
 
-const ViewClasses = () => {
+const ViewClasses = ({ semesterId }) => {
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [classes, setClasses] = useState([]);
+	const [targetId, setTargetId] = useState(0);
 
-	const addSubject = () => {
-		// if(showForm){
-		// 	const newSubject = {
-		// 		code: newCode,
-		// 		title: newTitle
-		// 	}
-
-		// 	switch(formTitle){
-		// 		case 'ADD':
-		// 			axios.post(`/api/subject/new`, newSubject).then(res => {
-		// 				updateSubjectsList();
-		// 				setCode('');
-		// 				setTitle('');
-		// 			}, err => {
-		// 				throw err;
-		// 			});
-		// 			break;
-		// 		case 'EDIT':
-		// 			newSubject.id = targetId;
-		// 			axios.put(`/api/subject/edit`, newSubject).then(res => {
-		// 				updateSubjectsList();
-		// 				setCode('');
-		// 				setTitle('');
-		// 			}, err => {
-		// 				throw err;
-		// 			});
-		// 			break;
-		// 		default:
-		// 			console.log(formTitle);
-		// 	}
-		// }
-		// setFormTitle('ADD');
-
-		// setShow(!showForm);
-	}
-
-	const editSubject = e => {
-		// setTargetId(subjects[e.target.id].key);
-		// setFormTitle('EDIT');
-
-		// setShow(!showForm);
+	const updateClasses = () => {
+		axios.get(`/api/class/${localStorage.getItem('id')}/${semesterId}`).then(res => {
+			setClasses(res.data);
+		}, err => {
+			throw err;
+		});
 	}
 
 	const openDeleteVal = e => {
-		// setTargetId(e.target.id);
-		// setShowDeleteModal(true);
+		setTargetId(e.target.id);
+		setShowDeleteModal(true);
 	}
 
 	const closeDeleteVal = () => {
-		// setShowDeleteModal(false);
+		setShowDeleteModal(false);
 	}
 
-	const deleteSubject = () => {
-		// axios.delete(`/api/subject/${targetId}`).then(res => {
-		// 	updateSubjectsList();
-		// }, err => {
-		// 	throw err;
-		// });
-		// closeDeleteVal();
-	}
+	const deleteClass = () => {
+		axios.delete(`/api/class/${targetId}`).then(() => {
+			updateClasses();
+		}, err => {
+			throw err;
+		});
 
-	const onChange = e => {
-		// const string = e.target.value;
-			
-		// switch(e.target.id){
-		// 	case 'code':
-		// 		setCode(string.toUpperCase());
-		// 		break;
-		// 	case 'title':
-		// 		setTitle(string);
-		// 		break;
-		// 	default:
-		// 		console.log(e.target.id);
-		// }
+		closeDeleteVal();
 	}
 
 	return (
 		<Modal size='tiny' trigger={
-			<Button size='mini'>
+			<Button onClick={updateClasses} size='mini'>
 				<Icon name='table' />
 				VIEW CLASSES
 			</Button>
@@ -91,55 +46,68 @@ const ViewClasses = () => {
 			<Modal open={showDeleteModal} basic size='small'>
 				<Modal.Content>
 					<p>
-						Are you sure you want to delete this subject?
+						Are you sure you want to delete this class?
 					</p>
 				</Modal.Content>
 				<Modal.Actions>
 					<Button basic color='grey' name='cancel' onClick={closeDeleteVal} inverted>
 						CANCEL
 					</Button>
-					<Button basic color='red' name='delete' onClick={deleteSubject} inverted>
+					<Button basic color='red' name='delete' onClick={deleteClass} inverted>
 						<Icon name='remove' /> DELETE
 					</Button>
 				</Modal.Actions>
 			</Modal>
 			<Modal.Header>
-				Subjects
+				Classes
 			</Modal.Header>
 			<Modal.Content>
+				<Segment inverted>
+					<List divided inverted relaxed>
+						<List.Item>
+							<List.Content>
+								<List.Header>
+									TOTAL : {classes.length}
+								</List.Header>
+							</List.Content>
+						</List.Item>
+						{
+							classes.map((cls, ind) =>(
+								<List.Item key={cls.id}>
+									<List.Content>
+										<List.Header>
+											{cls.code} {cls.number}
+										</List.Header>
+										{cls.title}
+										<Button icon size='mini' floated='right' id={cls.id} onClick={openDeleteVal}>
+											<Icon id={cls.id} name='close' />
+										</Button>
+										<ViewClassSection section={cls.recit_lab} />
+										<ViewClassSection section={cls.lecture} />
+										<Accordion inverted exclusive={false} fluid style={{ marginTop: '15px' }}>
+											<ClassData data={{
+												fullName: cls.fullName,
+												number: cls.number,
+												finals: cls.finals === 1,
+												required: cls.required === 1,
+												exemption: cls.exemption,
+												exempted: cls.exempted === 1,
+												passing: cls.passing,
+												passed: cls.passed === 1
+											}} />
+										</Accordion>
+									</List.Content>
+								</List.Item>
+							))
+						}
+					</List>
+				</Segment>
 			</Modal.Content>
 		</Modal>
 	)
 }
 
 /*
-				<Segment inverted>
-					<List divided inverted relaxed>
-						<List.Item>
-							<List.Content>
-								{
-									!showForm?
-									(
-										<List.Header>
-											TOTAL : {subjects.length}
-										</List.Header>
-									)
-									: null
-								}
-								<Button icon onClick={addSubject} floated='right' disabled={false}>
-									{formTitle} SUBJECT
-								</Button>
-							</List.Content>
-						</List.Item>
-						{
-							showForm?
-								(
-									<List.Item>
-										<List.Content>
-											<List.Header>
-												{formTitle} SUBJECT
-											</List.Header>
-												<Form inverted>
 													<Form.Field required>
 														<Input
 															id='code'
@@ -157,31 +125,6 @@ const ViewClasses = () => {
 															onChange={onChange}
 															value={newTitle}
 														/>
-													</Form.Field>
-												</Form>
-										</List.Content>
-									</List.Item>
-								)
-							: 
-								subjects.map((subject, ind) =>(
-									<List.Item key={subject.key}>
-										<List.Content>
-											<List.Header>
-												{subject.value}
-											</List.Header>
-											{subject.text}
-											<Button icon size='mini' floated='right' id={subject.key} onClick={openDeleteVal}>
-												<Icon id={subject.key} name='close' />
-											</Button>
-											<Button icon size='mini' floated='right' id={ind} onClick={editSubject}>
-												<Icon id={ind} name='edit' />
-											</Button>
-											<CoursesList subjectCode={subject.value} subjectId={subject.key} />
-										</List.Content>
-									</List.Item>
-								))
-						}
-					</List>
-				</Segment>*/
+													</Form.Field>*/
 
 export default ViewClasses;

@@ -45,10 +45,10 @@ const Menu = ({
 									<List divided verticalAlign='middle'>
 										<List.Item>
 											<List.Content floated='right'>
-												<ViewClasses />
+												<ViewClasses semesterId={semester.id} />
 												{
 													localStorage.getItem('admin') === 'false' && semester.active?
-														<AddClass subjects={subjects} />
+														<AddClass semesterId={semester.id} subjects={subjects} />
 													: null
 												}
 											</List.Content>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Checkbox, Container, Dropdown, Icon, Input, Form, Label, Modal, Pagination, Popup } from 'semantic-ui-react';
 import axios from 'axios';
 
-const AddClass = ({ subjects }) => {
+const AddClass = ({ semesterId, subjects }) => {
 	const [openModal, setOpen] = useState(false);
 	const [currentPage, setPage] = useState(1);
 
@@ -127,6 +127,7 @@ const AddClass = ({ subjects }) => {
 	const submit = () => {
 		const data = {
 			userId: localStorage.getItem('id'),
+			semesterId,
 			courseId,
 			finals,
 			required,
@@ -142,7 +143,7 @@ const AddClass = ({ subjects }) => {
 			maxAbsencesSmall
 		};
 
-		axios.post(`/api/user/class/new`, data).then(res => {
+		axios.post(`/api/class/new`, data).then(res => {
 			setOpen(false);
 		}, err => {
 			throw err;
