@@ -8,6 +8,9 @@ const AddClass = ({ semesterId, subjects }) => {
 
 	const [smallClass, setSmallClass] = useState(true);
 
+	const [selectedSubject, setSelectedSubject] = useState('Select Subject');
+	const [selectedCourse, setSelectedCourse] = useState('Select Course');
+
 	const [courses, setCourses] = useState([]);
 	const [courseId, setCourse] = useState(0);
 	const [finals, setFinals] = useState(true);
@@ -49,9 +52,12 @@ const AddClass = ({ semesterId, subjects }) => {
 	}
 
 	const updateCoursesList = (e, data) => {
-		const subjectId = data.options.find(opt => (
+		const subject = data.options.find(opt => (
 			opt.value === data.value
-		)).key;
+		));
+		const subjectId = subject.key;
+
+		setSelectedSubject(subject.text);
 
 		axios.get(`/api/subject/${subjectId}/course`).then(res => {
 			res.data.forEach(data => {
@@ -65,10 +71,12 @@ const AddClass = ({ semesterId, subjects }) => {
 	}
 
 	const updateCourseId = (e, data) => {
-		const courseId = data.options.find(opt => (
+		const course = data.options.find(opt => (
 			opt.value === data.value
-		)).key;
+		));
+		const courseId = course.key;
 
+		setSelectedCourse(course.text)
 		setCourse(courseId);
 	}
 
@@ -170,7 +178,7 @@ const AddClass = ({ semesterId, subjects }) => {
 											Subject
 										</Label>
 										<Dropdown
-											placeholder='Select Subject'
+											placeholder={selectedSubject}
 											fluid
 											search
 											selection
@@ -183,7 +191,7 @@ const AddClass = ({ semesterId, subjects }) => {
 											Course
 										</Label>
 										<Dropdown
-											placeholder='Select Course'
+											placeholder={selectedCourse}
 											fluid
 											search
 											selection
@@ -193,7 +201,7 @@ const AddClass = ({ semesterId, subjects }) => {
 									</Form.Field>
 									<Form.Field>
 										<Popup content='Does this class have a final exam?' trigger={
-											<Checkbox defaultChecked onChange={toggleFinals} label='Finals' toggle />
+											<Checkbox checked={finals} onChange={toggleFinals} label='Finals' toggle />
 										} />
 									</Form.Field>
 									{
@@ -202,7 +210,7 @@ const AddClass = ({ semesterId, subjects }) => {
 												<React.Fragment>
 													<Form.Field>
 														<Popup content='Is the final exam required regardless of prefinal standing?' trigger={
-															<Checkbox onChange={toggleRequired} label='Required' toggle />
+															<Checkbox checked={required} onChange={toggleRequired} label='Required' toggle />
 														} />
 													</Form.Field>
 													{
@@ -280,7 +288,7 @@ const AddClass = ({ semesterId, subjects }) => {
 								<Form>
 									<Form.Field>
 										<Popup content='Has a Recitation/Laboratory class?' trigger={
-											<Checkbox defaultChecked onChange={toggleSmallClass} toggle />
+											<Checkbox checked={smallClass} onChange={toggleSmallClass} toggle />
 										} />
 									</Form.Field>
 									{

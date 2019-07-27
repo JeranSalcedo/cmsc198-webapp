@@ -82,8 +82,12 @@ const ViewClasses = ({ semesterId }) => {
 										<Button icon size='mini' floated='right' id={cls.id} onClick={openDeleteVal}>
 											<Icon id={cls.id} name='close' />
 										</Button>
-										<ViewClassSection section={cls.recit_lab} />
-										<ViewClassSection section={cls.lecture} />
+										{
+											cls.recit_lab !== null?
+												<ViewClassSection title={cls.fullName + ' ' + cls.number} section={cls.recit_lab} />
+											: null
+										}
+										<ViewClassSection title={cls.fullName + ' ' + cls.number} section={cls.lecture} />
 										<Accordion inverted exclusive={false} fluid style={{ marginTop: '15px' }}>
 											<ClassData data={{
 												fullName: cls.fullName,
@@ -106,25 +110,5 @@ const ViewClasses = ({ semesterId }) => {
 		</Modal>
 	)
 }
-
-/*
-													<Form.Field required>
-														<Input
-															id='code'
-															label='Code'
-															labelPosition='left corner'
-															onChange={onChange}
-															value={newCode}
-														/>
-													</Form.Field>
-													<Form.Field required>
-														<Input
-															id='title'
-															label='Title'
-															labelPosition='left corner'
-															onChange={onChange}
-															value={newTitle}
-														/>
-													</Form.Field>*/
 
 export default ViewClasses;
