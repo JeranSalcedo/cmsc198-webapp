@@ -72,7 +72,7 @@ const ViewClasses = ({ semesterId }) => {
 							</List.Content>
 						</List.Item>
 						{
-							classes.map((cls, ind) =>(
+							classes.map((cls, ind) => (
 								<List.Item key={cls.id}>
 									<List.Content>
 										<List.Header>
@@ -84,10 +84,10 @@ const ViewClasses = ({ semesterId }) => {
 										</Button>
 										{
 											cls.recit_lab !== null?
-												<ViewClassSection title={cls.fullName + ' ' + cls.number} section={cls.recit_lab} />
+												<ViewClassSection title={cls.fullName + ' ' + cls.number} section={cls.recit_lab} active={cls.active} />
 											: null
 										}
-										<ViewClassSection title={cls.fullName + ' ' + cls.number} section={cls.lecture} />
+										<ViewClassSection title={cls.fullName + ' ' + cls.number} section={cls.lecture} active={cls.active} />
 										<Accordion inverted exclusive={false} fluid style={{ marginTop: '15px' }}>
 											<ClassData data={{
 												fullName: cls.fullName,
