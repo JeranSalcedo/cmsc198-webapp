@@ -76,6 +76,16 @@ const ClassData = ({ data }) => {
 							<Icon name={data.passed? 'check' : 'times'} style={{ paddingLeft: '40px' }} />
 						</Item.Content>
 					</Item>
+					<Item>
+						<Item.Content>
+							<Label style={{ textAlign: 'center', width: '90px' }}>
+								STANDING
+							</Label>
+							<Header size='small' style={{ color: 'white', paddingLeft: '40px' }}>
+								{data.standing}
+							</Header>
+						</Item.Content>
+					</Item>
 				</Item.Group>
 			</Accordion.Content>
 		</React.Fragment>

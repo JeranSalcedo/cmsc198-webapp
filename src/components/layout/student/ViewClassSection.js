@@ -5,6 +5,14 @@ import axios from 'axios';
 const ViewClassSection = ({ title, section, active }) => {
 	const [classData, setCLassData] = useState({section: 'Loading'});
 	const [absences, setAbsences] = useState(0);
+	const [standing, setStanding] = useState(0);
+
+	const [showEditQuiz, setShowEditQuiz] = useState(false);
+	const [quizPercentageText, setQuizPercentageText] = useState(1);
+	const [quizPercentage, setQuizPercentage] = useState(0);
+
+	const [assignmentPercentage, setAssignmentPercentage] = useState(0);
+	const [examPercentage, setExamPercentage] = useState(0);
 
 	const [quizzes, setQuizzes] = useState([]);
 	const [assignments, setAssignments] = useState([]);
@@ -13,22 +21,25 @@ const ViewClassSection = ({ title, section, active }) => {
 	const [showQuizForm, setShowQuizForm] = useState(false);
 	const [quizTitle, setQuizTitle] = useState('');
 	const [quizScore, setQuizScore] = useState(0);
-	const [quizTotal, setQuizTotal] = useState(0);
+	const [quizTotal, setQuizTotal] = useState(1);
 
 	const [showAssignmentForm, setShowAssignmentForm] = useState(false);
 	const [assignmentTitle, setAssignmentTitle] = useState('');
 	const [assignmentScore, setAssignmentScore] = useState(0);
-	const [assignmentTotal, setAssignmentTotal] = useState(0);
+	const [assignmentTotal, setAssignmentTotal] = useState(1);
 
 	const [showExamForm, setShowExamForm] = useState(false);
 	const [examTitle, setExamTitle] = useState('');
 	const [examScore, setExamScore] = useState(0);
-	const [examTotal, setExamTotal] = useState(0);
+	const [examTotal, setExamTotal] = useState(1);
 
 	useEffect(() => {
 		axios.get(`/api/class/section/${section}`).then(res => {
 			setAbsences(res.data.absences);
-
+			setStanding(res.data.standing);
+			setQuizPercentage(res.data.percentage_quiz);
+			setAssignmentPercentage(res.data.percentage_assignment);
+			setExamPercentage(res.data.percentage_exam);
 
 			setCLassData(res.data);
 		}, err => {
@@ -47,16 +58,14 @@ const ViewClassSection = ({ title, section, active }) => {
 	}
 
 	const addAbsences = () => {
-		if(absences < classData.allowable_absences){
-			axios.put(`/api/class/section/updateAbsences`, {
-				operation: 'add',
-				section
-			}).then(res => {
-				setAbsences(absences + 1);
-			}, err => {
-				throw err;
-			});
-		}
+		axios.put(`/api/class/section/updateAbsences`, {
+			operation: 'add',
+			section
+		}).then(res => {
+			setAbsences(absences + 1);
+		}, err => {
+			throw err;
+		});
 	}
 
 	const subAbsences = () => {
@@ -72,7 +81,7 @@ const ViewClassSection = ({ title, section, active }) => {
 		}
 	}
 
-	const openQuizForm = () => {
+	const openQuizForm = e => {
 		setQuizTitle('Quiz Title');
 		setShowQuizForm(true);
 	}
@@ -104,11 +113,15 @@ const ViewClassSection = ({ title, section, active }) => {
 	}
 
 	const updateQuizScore = e => {
-		setQuizScore(e.target.value);
+		if(e.target.value > -1 && e.target.value <= parseInt(quizTotal)){
+			setQuizScore(e.target.value);
+		}
 	}
 
 	const updateQuizTotal = e => {
-		setQuizTotal(e.target.value);
+		if(e.target.value > 0){
+			setQuizTotal(e.target.value);
+		}
 	}
 
 	const updateAssignmentTitle = e => {
@@ -116,11 +129,15 @@ const ViewClassSection = ({ title, section, active }) => {
 	}
 
 	const updateAssignmentScore = e => {
-		setAssignmentScore(e.target.value);
+		if(e.target.value > -1 && e.target.value <= parseInt(assignmentTotal)){
+			setAssignmentScore(e.target.value);
+		}
 	}
 
 	const updateAssignmentTotal = e => {
-		setAssignmentTotal(e.target.value);
+		if(e.target.value > 0){
+			setAssignmentTotal(e.target.value);
+		}
 	}
 
 	const updateExamTitle = e => {
@@ -128,68 +145,102 @@ const ViewClassSection = ({ title, section, active }) => {
 	}
 
 	const updateExamScore = e => {
-		setExamScore(e.target.value);
+		if(e.target.value > -1 && e.target.value <= parseInt(examTotal)){
+			setExamScore(e.target.value);
+		}
 	}
 
 	const updateExamTotal = e => {
-		setExamTotal(e.target.value);
+		if(e.target.value > 0){
+			setExamTotal(e.target.value);
+		}
+	}
+
+	const updateQuizPercentage = e => {
+		if(e.target.value > -1 && e.target.value < 101){
+			setQuizPercentageText(e.target.value);
+		}
+	}
+
+	const editQuizPercentage = () => {
+		if(showEditQuiz){
+			const data = {
+				section,
+				percentage: quizPercentageText
+			}
+
+			axios.put(`api/class/section/quiz/percentage/edit`, data).then(res => {
+				console.log(res);
+				// setQuizPercentage(quizPercentageText);
+			}, err => {
+				throw err;
+			});
+		}
+
+		setShowEditQuiz(!showEditQuiz);
 	}
 
 	const submitQuiz = () => {
-		const data = {
-			section,
-			title: quizTitle,
-			score: quizScore,
-			total: quizTotal
+		if(quizTotal > 0){
+			const data = {
+				section,
+				title: quizTitle,
+				score: quizScore,
+				total: quizTotal
+			}
+
+			axios.post(`api/class/section/quiz/new`, data).then(res => {
+				setQuizScore(0);
+				setQuizTotal(0);
+				setShowQuizForm(false);
+
+				updateQuizzes();
+			}, err => {
+				throw err;
+			});
 		}
-
-		axios.post(`api/class/section/quiz/new`, data).then(res => {
-			setQuizScore(0);
-			setQuizTotal(0);
-			setShowQuizForm(false);
-
-			updateQuizzes();
-		}, err => {
-			throw err;
-		});
 	}
 
 	const submitAssignment = () => {
-		const data = {
-			section,
-			title: assignmentTitle,
-			score: assignmentScore,
-			total: assignmentTotal
+		if(assignmentTotal > 0){
+			const data = {
+				section,
+				title: assignmentTitle,
+				score: assignmentScore,
+				total: assignmentTotal
+			}
+
+			axios.post(`api/class/section/assignment/new`, data).then(res => {
+				setAssignmentScore(0);
+				setAssignmentTotal(0);
+				setShowAssignmentForm(false);
+
+				updateAssignments();
+			}, err => {
+				throw err;
+			});
 		}
-
-		axios.post(`api/class/section/assignment/new`, data).then(res => {
-			setAssignmentScore(0);
-			setAssignmentTotal(0);
-			setShowAssignmentForm(false);
-
-			updateAssignments();
-		}, err => {
-			throw err;
-		});
 	}
 
 	const submitExam = () => {
-		const data = {
-			section,
-			title: examTitle,
-			score: examScore,
-			total: examTotal
+		if(examTotal > 0){
+			const data = {
+				section,
+				title: examTitle,
+				score: examScore,
+				total: examTotal
+			}
+
+			axios.post(`api/class/section/exam/new`, data).then(res => {
+				setExamScore(0);
+				setExamTotal(0);
+				setShowExamForm(false);
+
+				updateExams();
+			}, err => {
+				throw err;
+			});
 		}
-
-		axios.post(`api/class/section/exam/new`, data).then(res => {
-			setExamScore(0);
-			setExamTotal(0);
-			setShowExamForm(false);
-
-			updateExams();
-		}, err => {
-			throw err;
-		});
 	}
 
 	const updateQuizzes = () => {
@@ -261,9 +312,25 @@ const ViewClassSection = ({ title, section, active }) => {
 						</Item>
 						<Item>
 							<Item.Content>
+								<Label style={{ textAlign: 'center', width: '90px' }}>
+									STANDING
+								</Label>
+								<Header size='tiny' style={{ color: 'white', paddingLeft: '40px', paddingRight: '10px' }}>
+									{standing} / 100
+								</Header>
+							</Item.Content>
+						</Item>
+						<Item>
+							<Item.Content>
 								<Label style={{ textAlign: 'center', width: '100px' }}>
 									QUIZZES
 								</Label>
+								<Header size='tiny' style={{ color: 'white', paddingLeft: '30px' }}>
+									{standing}
+								</Header>
+								<Header size='tiny' style={{ color: 'grey', paddingLeft: '10px', paddingRight: '10px' }}>
+									{'( ' + quizPercentage + '% )'}
+								</Header>
 								{
 									active?
 										(
@@ -271,16 +338,16 @@ const ViewClassSection = ({ title, section, active }) => {
 												(
 													<React.Fragment>
 														<Input size='mini' inverted transparent style={{ marginLeft: '10px', width: '50px' }} onChange={updateQuizTitle} value={quizTitle}/>
-														<Input size='mini' type='number' inverted transparent style={{ marginLeft: '10px', width: '35px' }} onChange={updateQuizScore} value={quizScore}/>
+														<Input size='mini' type='number' inverted transparent style={{ marginLeft: '10px', width: '29px' }} onChange={updateQuizScore} value={quizScore}/>
 														{' / '}
-														<Input size='mini' type='number' inverted transparent style={{ marginRight: '10px', width: '35px' }} onChange={updateQuizTotal} value={quizTotal}/>
+														<Input size='mini' type='number' inverted transparent style={{ marginRight: '10px', width: '29px' }} onChange={updateQuizTotal} value={quizTotal}/>
 														<Button size='mini' circular icon='check' onClick={submitQuiz}/>
 														<Button size='mini' circular icon='cancel' onClick={closeQuizForm}/>
 													</React.Fragment>
 												)
 											:
 												(
-													<Button size='mini' style={{ marginLeft: '50px' }} onClick={openQuizForm}>
+													<Button size='mini' style={{ marginLeft: '50px', width: '150px' }} onClick={openQuizForm}>
 														<Icon name='add' />
 														ADD QUIZ
 													</Button>
@@ -317,16 +384,16 @@ const ViewClassSection = ({ title, section, active }) => {
 												(
 													<React.Fragment>
 														<Input size='mini' inverted transparent style={{ marginLeft: '10px', width: '50px' }} onChange={updateAssignmentTitle} value={assignmentTitle}/>
-														<Input size='mini' type='number' inverted transparent style={{ marginLeft: '10px', width: '35px' }} onChange={updateAssignmentScore} value={assignmentScore}/>
+														<Input size='mini' type='number' inverted transparent style={{ marginLeft: '10px', width: '29px' }} onChange={updateAssignmentScore} value={assignmentScore}/>
 														{' / '}
-														<Input size='mini' type='number' inverted transparent style={{ marginRight: '10px', width: '35px' }} onChange={updateAssignmentTotal} value={assignmentTotal}/>
+														<Input size='mini' type='number' inverted transparent style={{ marginRight: '10px', width: '29px' }} onChange={updateAssignmentTotal} value={assignmentTotal}/>
 														<Button size='mini' circular icon='check' onClick={submitAssignment}/>
 														<Button size='mini' circular icon='cancel' onClick={closeAssignmentForm}/>
 													</React.Fragment>
 												)
 											:
 												(
-													<Button size='mini' style={{ marginLeft: '50px' }} onClick={openAssignmentForm}>
+													<Button size='mini' style={{ marginLeft: '50px', width: '150px' }} onClick={openAssignmentForm}>
 														<Icon name='add' />
 														ADD ASSIGNMENT
 													</Button>
@@ -363,16 +430,16 @@ const ViewClassSection = ({ title, section, active }) => {
 												(
 													<React.Fragment>
 														<Input size='mini' inverted transparent style={{ marginLeft: '10px', width: '50px' }} onChange={updateExamTitle} value={examTitle}/>
-														<Input size='mini' type='number' inverted transparent style={{ marginLeft: '10px', width: '35px' }} onChange={updateExamScore} value={examScore}/>
+														<Input size='mini' type='number' inverted transparent style={{ marginLeft: '10px', width: '29px' }} onChange={updateExamScore} value={examScore}/>
 														{' / '}
-														<Input size='mini' type='number' inverted transparent style={{ marginRight: '10px', width: '35px' }} onChange={updateExamTotal} value={examTotal}/>
+														<Input size='mini' type='number' inverted transparent style={{ marginRight: '10px', width: '29px' }} onChange={updateExamTotal} value={examTotal}/>
 														<Button size='mini' circular icon='check' onClick={submitExam}/>
 														<Button size='mini' circular icon='cancel' onClick={closeExamForm}/>
 													</React.Fragment>
 												)
 											:
 												(
-													<Button size='mini' style={{ marginLeft: '50px' }} onClick={openExamForm}>
+													<Button size='mini' style={{ marginLeft: '50px', width: '150px' }} onClick={openExamForm}>
 														<Icon name='add' />
 														ADD EXAM
 													</Button>

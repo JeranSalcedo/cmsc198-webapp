@@ -21,10 +21,12 @@ const AddClass = ({ semesterId, subjects }) => {
 	const [sectionLecture, setSectionLecture] = useState('');
 	const [lecturer, setLecturer] = useState('');
 	const [maxAbsencesLecture, setMaxAbsencesLecture] = useState('');
+	const [percentageLecture, setPercentageLecture] = useState(50);
 
 	const [sectionSmall, setSectionSmall] = useState('');
 	const [instructor, setInstructor] = useState('');
 	const [maxAbsencesSmall, setMaxAbsencesSmall] = useState('');
+	const [percentageSmall, setPercentageSmall] = useState(50);
 
 	const [recit, setRecit] = useState(true);
 
@@ -41,9 +43,11 @@ const AddClass = ({ semesterId, subjects }) => {
 		setLecturer('');
 		setRecit(true);
 		setMaxAbsencesLecture('');
+		setPercentageLecture(50);
 		setSectionSmall('');
 		setInstructor('');
 		setMaxAbsencesSmall('');
+		setPercentageSmall(50);
 		setOpen(false);
 	}
 
@@ -94,6 +98,8 @@ const AddClass = ({ semesterId, subjects }) => {
 	}
 
 	const toggleSmallClass = () => {
+		setPercentageLecture(smallClass? 100 : 50);
+		setPercentageSmall(smallClass? 0 : 50);
 		setSmallClass(!smallClass);
 	}
 
@@ -127,6 +133,18 @@ const AddClass = ({ semesterId, subjects }) => {
 			case 'maxAbsencesSmall':
 				setMaxAbsencesSmall(e.target.value);
 				break;
+			case 'percentageLecture':
+				if(e.target.value > -1 && e.target.value < 101){
+					setPercentageLecture(e.target.value);
+					setPercentageSmall(100 - e.target.value);
+				}
+				break;
+			case 'percentageSmall':
+				if(e.target.value > -1 && e.target.value < 101){
+					setPercentageLecture(100 - e.target.value);
+					setPercentageSmall(e.target.value);
+				}
+				break;
 			default:
 				console.log(e.target.id);
 		}
@@ -144,11 +162,13 @@ const AddClass = ({ semesterId, subjects }) => {
 			sectionLecture,
 			lecturer,
 			maxAbsencesLecture,
+			percentageLecture,
 			smallClass,
 			recit,
 			sectionSmall,
 			instructor,
-			maxAbsencesSmall
+			maxAbsencesSmall,
+			percentageSmall
 		};
 
 		axios.post(`/api/class/new`, data).then(res => {
@@ -209,7 +229,7 @@ const AddClass = ({ semesterId, subjects }) => {
 											(
 												<React.Fragment>
 													<Form.Field>
-														<Popup content='Is the final exam required regardless of prefinal standing?' trigger={
+														<Popup content='Is the final exam required regardless of prefinal percentage?' trigger={
 															<Checkbox checked={required} onChange={toggleRequired} label='Required' toggle />
 														} />
 													</Form.Field>
@@ -281,6 +301,22 @@ const AddClass = ({ semesterId, subjects }) => {
 											value={maxAbsencesLecture}
 										/>
 									</Form.Field>
+									{
+										smallClass?
+											(
+												<Form.Field>
+													<Input
+														id='percentageLecture'
+														label='Lecture Percent'
+														labelPosition='left corner'
+														type='number'
+														onChange={onChange}
+														value={percentageLecture}
+													/>
+												</Form.Field>
+											)
+										: null
+									}
 								</Form>
 							)
 						: 
@@ -341,6 +377,16 @@ const AddClass = ({ semesterId, subjects }) => {
 															type='number'
 															onChange={onChange}
 															value={maxAbsencesSmall}
+														/>
+													</Form.Field>
+													<Form.Field>
+														<Input
+															id='percentageSmall'
+															label={(recit? 'Recitation' : 'Laboratory') + ' Percent'}
+															labelPosition='left corner'
+															type='number'
+															onChange={onChange}
+															value={percentageSmall}
 														/>
 													</Form.Field>
 												</React.Fragment>

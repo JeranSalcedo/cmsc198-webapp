@@ -97,7 +97,8 @@ const ViewClasses = ({ semesterId }) => {
 												exemption: cls.exemption,
 												exempted: cls.exempted === 1,
 												passing: cls.passing,
-												passed: cls.passed === 1
+												passed: cls.passed === 1,
+												standing: cls.standing
 											}} />
 										</Accordion>
 									</List.Content>
