@@ -8,11 +8,20 @@ const ViewClassSection = ({ title, section, active }) => {
 	const [standing, setStanding] = useState(0);
 
 	const [showEditQuiz, setShowEditQuiz] = useState(false);
-	const [quizPercentageText, setQuizPercentageText] = useState(1);
+	const [quizScorePercentage, setQuizScorePercentage] = useState(0);
 	const [quizPercentage, setQuizPercentage] = useState(0);
+	const [quizScoreAll, setQuizScoreAll] = useState(0);
+	const [quizTotalAll, setQuizTotalAll] = useState(0);
 
+	const [assignmentScorePercentage, setAssignmentScorePercentage] = useState(0);
 	const [assignmentPercentage, setAssignmentPercentage] = useState(0);
+	const [assignmentScoreAll, setAssignmentScoreAll] = useState(0);
+	const [assignmentTotalAll, setAssignmentTotalAll] = useState(0);
+	
+	const [examScorePercentage, setExamScorePercentage] = useState(0);
 	const [examPercentage, setExamPercentage] = useState(0);
+	const [examScoreAll, setExamScoreAll] = useState(0);
+	const [examTotalAll, setExamTotalAll] = useState(0);
 
 	const [quizzes, setQuizzes] = useState([]);
 	const [assignments, setAssignments] = useState([]);
@@ -37,9 +46,20 @@ const ViewClassSection = ({ title, section, active }) => {
 		axios.get(`/api/class/section/${section}`).then(res => {
 			setAbsences(res.data.absences);
 			setStanding(res.data.standing);
+
+			setQuizScorePercentage(res.data.percentage_quiz_score);
 			setQuizPercentage(res.data.percentage_quiz);
+			setAssignmentScorePercentage(res.data.percentage_assignment_score);
 			setAssignmentPercentage(res.data.percentage_assignment);
+			setExamScorePercentage(res.data.percentage_exam_score);
 			setExamPercentage(res.data.percentage_exam);
+
+			setQuizScoreAll(res.data.quiz_score);
+			setQuizTotalAll(res.data.quiz_total);
+			setAssignmentScoreAll(res.data.assignment_score);
+			setAssignmentTotalAll(res.data.assignment_total);
+			setExamScoreAll(res.data.exam_score);
+			setExamTotalAll(res.data.exam_total);
 
 			setCLassData(res.data);
 		}, err => {
@@ -157,16 +177,15 @@ const ViewClassSection = ({ title, section, active }) => {
 	}
 
 	const updateQuizPercentage = e => {
-		if(e.target.value > -1 && e.target.value < 101){
-			setQuizPercentageText(e.target.value);
-		}
+		// if(e.target.value > -1 && e.target.value < 101){
+		// 	setQuizPercentageText(e.target.value);
+		// }
 	}
 
 	const editQuizPercentage = () => {
 		if(showEditQuiz){
 			const data = {
-				section,
-				percentage: quizPercentageText
+				section
 			}
 
 			axios.put(`api/class/section/quiz/percentage/edit`, data).then(res => {
@@ -191,8 +210,11 @@ const ViewClassSection = ({ title, section, active }) => {
 
 			axios.post(`api/class/section/quiz/new`, data).then(res => {
 				setQuizScore(0);
-				setQuizTotal(0);
+				setQuizTotal(1);
 				setShowQuizForm(false);
+				setQuizScorePercentage((quizScoreAll + parseInt(quizScore)) * quizPercentage / (quizTotalAll + parseInt(quizTotal)));
+				setQuizScoreAll(quizScoreAll + parseInt(quizScore));
+				setQuizTotalAll(quizTotalAll + parseInt(quizTotal));
 
 				updateQuizzes();
 			}, err => {
@@ -212,8 +234,11 @@ const ViewClassSection = ({ title, section, active }) => {
 
 			axios.post(`api/class/section/assignment/new`, data).then(res => {
 				setAssignmentScore(0);
-				setAssignmentTotal(0);
+				setAssignmentTotal(1);
 				setShowAssignmentForm(false);
+				setAssignmentScorePercentage((assignmentScoreAll + parseInt(assignmentScore)) * assignmentPercentage / (assignmentTotalAll + parseInt(assignmentTotal)));
+				setAssignmentScoreAll(assignmentScoreAll + parseInt(assignmentScore));
+				setAssignmentTotalAll(assignmentTotalAll + parseInt(assignmentTotal));
 
 				updateAssignments();
 			}, err => {
@@ -233,8 +258,11 @@ const ViewClassSection = ({ title, section, active }) => {
 
 			axios.post(`api/class/section/exam/new`, data).then(res => {
 				setExamScore(0);
-				setExamTotal(0);
+				setExamTotal(1);
 				setShowExamForm(false);
+				setExamScorePercentage((examScoreAll + parseInt(examScore)) * examPercentage / (examTotalAll + parseInt(examTotal)));
+				setExamScoreAll(examScoreAll + parseInt(examScore));
+				setExamTotalAll(examTotalAll + parseInt(examTotal));
 
 				updateExams();
 			}, err => {
@@ -244,6 +272,7 @@ const ViewClassSection = ({ title, section, active }) => {
 	}
 
 	const updateQuizzes = () => {
+		updateStanding();
 		axios.get(`api/class/section/${section}/quiz`).then(res => {
 			setQuizzes(res.data);
 		}, err => {
@@ -252,6 +281,7 @@ const ViewClassSection = ({ title, section, active }) => {
 	}
 
 	const updateAssignments = () => {
+		updateStanding();
 		axios.get(`api/class/section/${section}/assignment`).then(res => {
 			setAssignments(res.data);
 		}, err => {
@@ -260,8 +290,66 @@ const ViewClassSection = ({ title, section, active }) => {
 	}
 
 	const updateExams = () => {
+		updateStanding();
 		axios.get(`api/class/section/${section}/exam`).then(res => {
 			setExams(res.data);
+		}, err => {
+			throw err;
+		});
+	}
+
+	const editQuiz = e => {
+		console.log(e.target.id);
+	}
+
+	const deleteQuiz = e => {
+		axios.delete(`api/class/section/quiz/${e.target.id}`).then(res => {
+			setQuizScorePercentage(res.data.newValue);
+			setQuizScoreAll(res.data.score);
+			setQuizTotalAll(res.data.total);
+			updateQuizzes();
+		}, err => {
+			throw err;
+		});
+	}
+
+	const editAssignment = e => {
+		console.log(e.target.id);
+	}
+
+	const deleteAssignment = e => {
+		axios.delete(`api/class/section/assignment/${e.target.id}`).then(res => {
+			setAssignmentScorePercentage(res.data.newValue);
+			setAssignmentScoreAll(res.data.score);
+			setAssignmentTotalAll(res.data.total);
+			updateAssignments();
+		}, err => {
+			throw err;
+		});
+	}
+
+	const editExam = e => {
+		console.log(e.target.id);
+	}
+
+	const deleteExam = e => {
+		axios.delete(`api/class/section/exam/${e.target.id}`).then(res => {
+			setExamScorePercentage(res.data.newValue);
+			setExamScoreAll(res.data.score);
+			setExamTotalAll(res.data.total);
+			updateExams();
+		}, err => {
+			throw err;
+		});
+	}
+
+	const updateStanding = () => {
+		const data = {
+			section
+		}
+
+		axios.put(`api/class/section/standing`, data).then(res => {
+			setStanding(res.data.standing);
 		}, err => {
 			throw err;
 		});
@@ -326,7 +414,7 @@ const ViewClassSection = ({ title, section, active }) => {
 									QUIZZES
 								</Label>
 								<Header size='tiny' style={{ color: 'white', paddingLeft: '30px' }}>
-									{standing}
+									{quizScorePercentage}
 								</Header>
 								<Header size='tiny' style={{ color: 'grey', paddingLeft: '10px', paddingRight: '10px' }}>
 									{'( ' + quizPercentage + '% )'}
@@ -363,9 +451,18 @@ const ViewClassSection = ({ title, section, active }) => {
 													quizzes.map(quiz => (
 														<List.Item key={quiz.id}>
 															{quiz.title}: {quiz.score} / {quiz.total}
+															<Button id={quiz.id} icon size='mini' onClick={editQuiz} style={{ marginLeft: '10px' }}>
+																<Icon id={quiz.id} name='edit' />
+															</Button>
+															<Button id={quiz.id} icon size='mini' onClick={deleteQuiz}>
+																<Icon id={quiz.id} name='delete' />
+															</Button>
 														</List.Item>
 													))
 												}
+												<List.Item>
+													TOTAL: {quizScoreAll} / {quizTotalAll}
+												</List.Item>
 											</List>
 										)
 									: null
@@ -377,6 +474,12 @@ const ViewClassSection = ({ title, section, active }) => {
 								<Label style={{ textAlign: 'center', width: '100px' }}>
 									ASSIGNMENTS
 								</Label>
+								<Header size='tiny' style={{ color: 'white', paddingLeft: '30px' }}>
+									{assignmentScorePercentage}
+								</Header>
+								<Header size='tiny' style={{ color: 'grey', paddingLeft: '10px', paddingRight: '10px' }}>
+									{'( ' + assignmentPercentage + '% )'}
+								</Header>
 								{
 									active?
 										(
@@ -409,9 +512,18 @@ const ViewClassSection = ({ title, section, active }) => {
 													assignments.map(assignment => (
 														<List.Item key={assignment.id}>
 															{assignment.title}: {assignment.score} / {assignment.total}
+															<Button id={assignment.id} icon size='mini' onClick={editAssignment} style={{ marginLeft: '10px' }}>
+																<Icon id={assignment.id} name='edit' />
+															</Button>
+															<Button id={assignment.id} icon size='mini' onClick={deleteAssignment}>
+																<Icon id={assignment.id} name='delete' />
+															</Button>
 														</List.Item>
 													))
 												}
+												<List.Item>
+													TOTAL: {assignmentScoreAll} / {assignmentTotalAll}
+												</List.Item>
 											</List>
 										)
 									: null
@@ -423,6 +535,12 @@ const ViewClassSection = ({ title, section, active }) => {
 								<Label style={{ textAlign: 'center', width: '100px' }}>
 									EXAMS
 								</Label>
+								<Header size='tiny' style={{ color: 'white', paddingLeft: '30px' }}>
+									{examScorePercentage}
+								</Header>
+								<Header size='tiny' style={{ color: 'grey', paddingLeft: '10px', paddingRight: '10px' }}>
+									{'( ' + examPercentage + '% )'}
+								</Header>
 								{
 									active?
 										(
@@ -455,9 +573,18 @@ const ViewClassSection = ({ title, section, active }) => {
 													exams.map(exam => (
 														<List.Item key={exam.id}>
 															{exam.title}: {exam.score} / {exam.total}
+															<Button id={exam.id} icon size='mini' onClick={editExam} style={{ marginLeft: '10px' }}>
+																<Icon id={exam.id} name='edit' />
+															</Button>
+															<Button id={exam.id} icon size='mini' onClick={deleteExam}>
+																<Icon id={exam.id} name='delete' />
+															</Button>
 														</List.Item>
 													))
 												}
+												<List.Item>
+													TOTAL: {examScoreAll} / {examTotalAll}
+												</List.Item>
 											</List>
 										)
 									: null
