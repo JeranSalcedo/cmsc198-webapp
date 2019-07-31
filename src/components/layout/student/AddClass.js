@@ -15,6 +15,7 @@ const AddClass = ({ semesterId, subjects }) => {
 	const [courseId, setCourse] = useState(0);
 	const [finals, setFinals] = useState(true);
 	const [required, setRequired] = useState(false);
+	const [percentageFinals, setPercentageFinals] = useState(20);
 	const [exemption, setExemption] = useState('');
 	const [passing, setPassing] = useState('');
 
@@ -37,6 +38,7 @@ const AddClass = ({ semesterId, subjects }) => {
 		setCourse(0);
 		setFinals(true);
 		setRequired(true);
+		setPercentageFinals(20);
 		setExemption('');
 		setPassing('');
 		setSectionLecture('');
@@ -109,6 +111,11 @@ const AddClass = ({ semesterId, subjects }) => {
 
 	const onChange = e => {
 		switch(e.target.id){
+			case 'percentageFinals':
+				if(e.target.value > -1 && e.target.value < 101){
+					setPercentageFinals(e.target.value);
+				}
+				break;
 			case 'exemption':
 				setExemption(e.target.value);
 				break;
@@ -157,6 +164,7 @@ const AddClass = ({ semesterId, subjects }) => {
 			courseId,
 			finals,
 			required,
+			percentageFinals,
 			exemption,
 			passing,
 			sectionLecture,
@@ -232,6 +240,16 @@ const AddClass = ({ semesterId, subjects }) => {
 														<Popup content='Is the final exam required regardless of prefinal percentage?' trigger={
 															<Checkbox checked={required} onChange={toggleRequired} label='Required' toggle />
 														} />
+													</Form.Field>
+													<Form.Field>
+														<Input
+															id='percentageFinals'
+															label='Finals Percent'
+															labelPosition='left corner'
+															type='number'
+															onChange={onChange}
+															value={percentageFinals}
+														/>
 													</Form.Field>
 													{
 														required?

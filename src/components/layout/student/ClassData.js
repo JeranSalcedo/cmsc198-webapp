@@ -79,7 +79,7 @@ const ClassData = ({ data }) => {
 					<Item>
 						<Item.Content>
 							<Label style={{ textAlign: 'center', width: '90px' }}>
-								STANDING
+								{data.finals && !data.required? 'PREFINAL' : ''} STANDING
 							</Label>
 							<Header size='small' style={{ color: 'white', paddingLeft: '40px' }}>
 								{data.standing}

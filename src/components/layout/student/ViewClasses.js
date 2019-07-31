@@ -36,6 +36,18 @@ const ViewClasses = ({ semesterId }) => {
 		closeDeleteVal();
 	}
 
+	const updatedClassStanding = (id) => {
+		const data = {
+			id
+		};
+
+		axios.put(`/api/class/standing/edit`, data).then(res => {
+			updateClasses();
+		}, err => {
+			throw err;
+		});
+	}
+
 	return (
 		<Modal size='tiny' trigger={
 			<Button onClick={updateClasses} size='mini'>
@@ -84,10 +96,10 @@ const ViewClasses = ({ semesterId }) => {
 										</Button>
 										{
 											cls.recit_lab !== null?
-												<ViewClassSection title={cls.fullName + ' ' + cls.number} section={cls.recit_lab} active={cls.active} percentage={cls.percentageSmall} />
+												<ViewClassSection title={cls.fullName + ' ' + cls.number} section={cls.recit_lab} active={cls.active} percentage={cls.percentageSmall} classId={cls.id} updateClassStanding={updatedClassStanding} />
 											: null
 										}
-										<ViewClassSection title={cls.fullName + ' ' + cls.number} section={cls.lecture} active={cls.active} percentage={cls.percentageLecture} />
+										<ViewClassSection title={cls.fullName + ' ' + cls.number} section={cls.lecture} active={cls.active} percentage={cls.percentageLecture} classId={cls.id} updateClassStanding={updatedClassStanding} />
 										<Accordion inverted exclusive={false} fluid style={{ marginTop: '15px' }}>
 											<ClassData data={{
 												fullName: cls.fullName,

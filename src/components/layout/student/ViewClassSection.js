@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Container, Header, Icon, Input, Item, Label, List, Modal, Segment } from 'semantic-ui-react';
+import { Button, Header, Icon, Input, Item, Label, List, Modal, Segment } from 'semantic-ui-react';
 import axios from 'axios';
 
-const ViewClassSection = ({ title, section, active, percentage }) => {
+const ViewClassSection = ({ title, section, active, percentage, classId, updateClassStanding }) => {
 	const [classData, setCLassData] = useState({section: 'Loading'});
 	const [absences, setAbsences] = useState(0);
 	const [standing, setStanding] = useState(0);
@@ -43,6 +43,8 @@ const ViewClassSection = ({ title, section, active, percentage }) => {
 	const [examScore, setExamScore] = useState(0);
 	const [examTotal, setExamTotal] = useState(1);
 
+	const [newStanding, setNewStanding] = useState(false);
+
 	useEffect(() => {
 		axios.get(`/api/class/section/${section}`).then(res => {
 			setAbsences(res.data.absences);
@@ -66,6 +68,7 @@ const ViewClassSection = ({ title, section, active, percentage }) => {
 	}, [section]);
 
 	const loadData = () => {
+		setNewStanding(false);
 		axios.get(`/api/class/section/${section}/classWork`).then(res => {	
 			setQuizzes(res.data[0]);
 			setAssignments(res.data[1]);
@@ -321,10 +324,6 @@ const ViewClassSection = ({ title, section, active, percentage }) => {
 		});
 	}
 
-	const editQuiz = e => {
-		console.log(e.target.id);
-	}
-
 	const deleteQuiz = e => {
 		axios.delete(`api/class/section/quiz/${e.target.id}/${quizzes.length}`).then(res => {
 			setQuizScorePercentage(res.data.newValue);
@@ -335,10 +334,6 @@ const ViewClassSection = ({ title, section, active, percentage }) => {
 		});
 	}
 
-	const editAssignment = e => {
-		console.log(e.target.id);
-	}
-
 	const deleteAssignment = e => {
 		axios.delete(`api/class/section/assignment/${e.target.id}/${assignments.length}`).then(res => {
 			setAssignmentScorePercentage(res.data.newValue);
@@ -347,10 +342,6 @@ const ViewClassSection = ({ title, section, active, percentage }) => {
 		}, err => {
 			throw err;
 		});
-	}
-
-	const editExam = e => {
-		console.log(e.target.id);
 	}
 
 	const deleteExam = e => {
@@ -370,9 +361,17 @@ const ViewClassSection = ({ title, section, active, percentage }) => {
 
 		axios.put(`api/class/section/standing`, data).then(res => {
 			setStanding(res.data.standing);
+
+			setNewStanding(true);
 		}, err => {
 			throw err;
 		});
+	}
+
+	const checkNewStanding = () => {
+		if(newStanding){
+			updateClassStanding(classId);
+		}
 	}
 
 	return (
@@ -381,7 +380,7 @@ const ViewClassSection = ({ title, section, active, percentage }) => {
 				<Icon name='external alternate' />
 				{classData.section}
 			</Button>
-		}>
+		} onClose={checkNewStanding}>
 			<Modal.Header>
 				{title} {classData.section}
 			</Modal.Header>
@@ -432,28 +431,28 @@ const ViewClassSection = ({ title, section, active, percentage }) => {
 							</Item.Content>
 						</Item>
 						<Item>
-							<Item.Content>
-								<Container align='middle'>
-									{
-										showEditPercentage?
-											(
-												<React.Fragment>
-														<Input size='small' label='Q' labelPosition='left' type='number' inverted transparent style={{ marginRight: '50px', width: '34px' }} onChange={updateQuizPercentage} value={quizPercentageEdit}/>
-														<Input size='small' label='A' labelPosition='left' type='number' inverted transparent style={{ marginRight: '50px', width: '34px' }} onChange={updateAssignmentPercentage} value={assignmentPercentageEdit}/>
-														<Input size='small' label='E' labelPosition='left' type='number' inverted transparent style={{ marginRight: '50px', width: '34px' }} onChange={updateExamPercentage} value={examPercentageEdit}/>
-														<Button size='mini' circular icon='check' onClick={submitPercentages}/>
-														<Button size='mini' circular icon='cancel' onClick={closeEditPercentage}/>
-												</React.Fragment>
-											)
-										:
-											(
-												<Button size='mini' onClick={openEditPercentage}>
-													<Icon name='edit'/>
-													EDIT PERCENTAGES
-												</Button>
-											)
-									}
-								</Container>
+							<Item.Content style={{
+									marginLeft: '150px'
+								}}>
+								{
+									showEditPercentage?
+										(
+											<React.Fragment>
+													<Input size='small' label='Q' labelPosition='left' type='number' inverted transparent style={{ marginRight: '50px', width: '34px' }} onChange={updateQuizPercentage} value={quizPercentageEdit}/>
+													<Input size='small' label='A' labelPosition='left' type='number' inverted transparent style={{ marginRight: '50px', width: '34px' }} onChange={updateAssignmentPercentage} value={assignmentPercentageEdit}/>
+													<Input size='small' label='E' labelPosition='left' type='number' inverted transparent style={{ marginRight: '50px', width: '34px' }} onChange={updateExamPercentage} value={examPercentageEdit}/>
+													<Button size='mini' circular icon='check' onClick={submitPercentages}/>
+													<Button size='mini' circular icon='cancel' onClick={closeEditPercentage}/>
+											</React.Fragment>
+										)
+									:
+										(
+											<Button size='mini' onClick={openEditPercentage}>
+												<Icon name='edit'/>
+												EDIT PERCENTAGES
+											</Button>
+										)
+								}
 							</Item.Content>
 						</Item>
 						<Item>
@@ -499,10 +498,7 @@ const ViewClassSection = ({ title, section, active, percentage }) => {
 													quizzes.map(quiz => (
 														<List.Item key={quiz.id}>
 															{quiz.title}: {quiz.score} / {quiz.total}
-															<Button id={quiz.id} icon size='mini' onClick={editQuiz} style={{ marginLeft: '10px' }}>
-																<Icon id={quiz.id} name='edit' />
-															</Button>
-															<Button id={quiz.id} icon size='mini' onClick={deleteQuiz}>
+															<Button id={quiz.id} icon size='mini' onClick={deleteQuiz} style={{ marginLeft: '10px' }}>
 																<Icon id={quiz.id} name='delete' />
 															</Button>
 														</List.Item>
@@ -560,10 +556,7 @@ const ViewClassSection = ({ title, section, active, percentage }) => {
 													assignments.map(assignment => (
 														<List.Item key={assignment.id}>
 															{assignment.title}: {assignment.score} / {assignment.total}
-															<Button id={assignment.id} icon size='mini' onClick={editAssignment} style={{ marginLeft: '10px' }}>
-																<Icon id={assignment.id} name='edit' />
-															</Button>
-															<Button id={assignment.id} icon size='mini' onClick={deleteAssignment}>
+															<Button id={assignment.id} icon size='mini' onClick={deleteAssignment} style={{ marginLeft: '10px' }}>
 																<Icon id={assignment.id} name='delete' />
 															</Button>
 														</List.Item>
@@ -621,10 +614,7 @@ const ViewClassSection = ({ title, section, active, percentage }) => {
 													exams.map(exam => (
 														<List.Item key={exam.id}>
 															{exam.title}: {exam.score} / {exam.total}
-															<Button id={exam.id} icon size='mini' onClick={editExam} style={{ marginLeft: '10px' }}>
-																<Icon id={exam.id} name='edit' />
-															</Button>
-															<Button id={exam.id} icon size='mini' onClick={deleteExam}>
+															<Button id={exam.id} icon size='mini' onClick={deleteExam} style={{ marginLeft: '10px' }}>
 																<Icon id={exam.id} name='delete' />
 															</Button>
 														</List.Item>

@@ -45,7 +45,11 @@ const Menu = ({
 									<List divided verticalAlign='middle'>
 										<List.Item>
 											<List.Content floated='right'>
-												<ViewClasses semesterId={semester.id} />
+												{
+													localStorage.getItem('admin') === 'false'?
+														<ViewClasses semesterId={semester.id} />
+													: null
+												}
 												{
 													localStorage.getItem('admin') === 'false' && semester.active?
 														<AddClass semesterId={semester.id} subjects={subjects} />

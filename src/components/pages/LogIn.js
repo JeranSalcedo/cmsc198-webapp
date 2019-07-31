@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Redirect } from 'react-router-dom';
+import { Button, Container, Icon, Input, Form } from 'semantic-ui-react';
 import axios from 'axios';
 
 const LogIn = () => {
@@ -52,12 +53,31 @@ const LogIn = () => {
 					<Redirect to='/' />
 				: null
 			}
-			<h1>Log In</h1>
-			<form onSubmit={onSubmit}>
-				<input type='text' name='username' placedholder='' onChange={onChange} value={username} />
-				<input type='password' name='password' placedholder='' onChange={onChange} value={password} />
-				<input type='submit' onClick={onSubmit} />
-			</form>
+			<Container align='middle' style={{
+				margin: '0',
+				position: 'absolute',
+				top: '25%',
+				left: '25%',
+				transform: 'translate(-25%, -25%)'
+			}}>
+				<h1>Log In</h1>
+				<Form style={{
+					width: '500px'
+				}}>
+					<Form.Field>
+						<Input label='STUDENT ID' size='small' type='text' name='username' placedholder='' onChange={onChange} value={username} />
+					</Form.Field>
+					<Form.Field>
+						<Input label='PASSWORD' size='small' type='password' name='password' placedholder='' onChange={onChange} value={password} />
+					</Form.Field>
+					<Form.Field>
+		    			<Button type='submit' onClick={onSubmit}>
+		    				<Icon name='sign in' />
+		    				SIGN IN
+		    			</Button>
+					</Form.Field>
+				</Form>
+			</Container>
 		</React.Fragment>
 	)
 }

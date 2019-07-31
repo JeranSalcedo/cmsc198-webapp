@@ -10,7 +10,6 @@ import 'semantic-ui-less/semantic.less'
 // import axios from 'axios';
 
 const App = () => {
-  console.log(window.localStorage);
   return (
     <Router>
       <div className='app'>
