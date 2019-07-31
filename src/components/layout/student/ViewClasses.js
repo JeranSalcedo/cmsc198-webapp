@@ -84,10 +84,10 @@ const ViewClasses = ({ semesterId }) => {
 										</Button>
 										{
 											cls.recit_lab !== null?
-												<ViewClassSection title={cls.fullName + ' ' + cls.number} section={cls.recit_lab} active={cls.active} />
+												<ViewClassSection title={cls.fullName + ' ' + cls.number} section={cls.recit_lab} active={cls.active} percentage={cls.percentageSmall} />
 											: null
 										}
-										<ViewClassSection title={cls.fullName + ' ' + cls.number} section={cls.lecture} active={cls.active} />
+										<ViewClassSection title={cls.fullName + ' ' + cls.number} section={cls.lecture} active={cls.active} percentage={cls.percentageLecture} />
 										<Accordion inverted exclusive={false} fluid style={{ marginTop: '15px' }}>
 											<ClassData data={{
 												fullName: cls.fullName,
