@@ -32,12 +32,14 @@ const AddClass = ({ semesterId, subjects }) => {
 	const [recit, setRecit] = useState(true);
 
 	const resetState = () => {
+		setSelectedSubject('Select Subject');
+		setSelectedCourse('Select Course');
 		setPage(1);
 		setSmallClass(true);
 		setCourses([]);
 		setCourse(0);
 		setFinals(true);
-		setRequired(true);
+		setRequired(false);
 		setPercentageFinals(20);
 		setExemption('');
 		setPassing('');
@@ -180,6 +182,7 @@ const AddClass = ({ semesterId, subjects }) => {
 		};
 
 		axios.post(`/api/class/new`, data).then(res => {
+			resetState();
 			setOpen(false);
 		}, err => {
 			throw err;
